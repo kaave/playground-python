@@ -11,6 +11,8 @@
 python3 -m venv .venv
 # enable local environments
 . .venv/bin/activate
+# upgrate pip
+pip install --upgrade pip
 # install all pip modules
 pip install -r requirements.txt
 ```
@@ -22,6 +24,6 @@ pip install -r requirements.txt
 ipython
 # add pip library
 pip install XXX
-# ...and export npm list
+# ...and export pip modules list
 pip freeze > requirements.txt
 ```
