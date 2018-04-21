@@ -361,7 +361,7 @@ for i, (key, value) in enumerate(dict.items()):
     print(i, key, value)
 ```
 
-比較
+### 比較
 
 ```python
 # 値の比較とオブジェクトの比較の2種類がある
@@ -382,7 +382,7 @@ print(x is z) # False
 1 < 2 > 3 # => False
 ```
 
-制御構文
+### 制御構文
 
 ```python
 # Pythonで偽と判定されるのは以下など
@@ -447,3 +447,147 @@ for index in range(1, 100 + 1):
         print(index)
 ```
 
+### 関数
+
+```python
+# defで定義
+# なお、巻き上げとかないので定義前に使用することはできない
+def sum(a, b):
+    return a + b
+
+# 呼び出しは引数を順番通りに指定するやり方と、キーワード引数がある
+sum(1, 10) # => 11
+# キーワード引数の場合、順番を無視できる
+sum(b=10, a=1)
+
+# デフォルト引数もあるよ
+def hw(name='world'):
+    return 'Hello, ' + name
+
+hw() # => 'Hello, world'
+hw('Jane') # => 'Hello, Jane'
+
+# 可変長引数は2種類 *ひとつで値だけのやつ たくさん突っ込むとtupleでとれる
+def sum_arguments(a, *args):
+    print(a, args)
+
+sum_arguments(1, 2, 3, 4, 5) # => 1 (2, 3, 4, 5)
+
+# *2つでkey, valueのdictとれる
+def sum_args(a, **args):
+    print(a, args)
+
+sum_args(1, b=2, c=3, d=4, e=5) # => 1 {'b': 2, 'c': 3, 'd': 4, 'e': 5}
+
+# 戻り値はreturnで普通に返す
+def sum_result():
+    return 'Hello'
+# なんもないとNoneが帰る
+def non_result():
+    pass
+# 戻り値複数返すとtupleでとれる
+def multi_result():
+    return 'Hello', 'You'
+
+# デフォルト引数は宣言時？の1回だけ初期化されるので、気をつけないとダメ
+# 以下は想像通りのことがおきる
+def ng_default_argv(x, arg=[]):
+    arg.append(x)
+    return arg
+# これならOK...なんだけどそもそももうすこし考えたほうがいいだろうなー
+def ok_default_argv(x, arg=None):
+    if arg is None:
+        arg = []
+
+    arg.append(x)
+    return arg
+
+# 関数外で宣言した変数をグローバル変数、関数内はローカル変数と一般的に言われるらしい
+# グローバル変数を関数内で変更したい際には小ネタが必要 まぁでもそもそもこういうのダメだよね
+x = 100
+def sample_function():
+    global x # global宣言 xはglobal変数であることを明示する
+    x = 200
+
+# 関数は変数にぶち込める 最近の言語だね
+def add(a, b):
+    return a + b
+
+a = add
+a(1, 2) # => 3
+
+# 関数内で関数を宣言できる
+# その際、上位の関数で宣言された変数を参照するときにお作法がいろいろ
+def outer_function():
+    x = 100
+    print(x, 'outer_function') # => 100
+
+    def inner_function():
+        # 上位で宣言されたものを参照する際には以下のように宣言する
+        nonlocal x
+        x = 200
+        print(x, 'inner_function') # => 200
+
+    inner_function()
+    print(x 'after inner_function()') # => 200
+
+outer_function()
+
+---
+
+# ジェネレータがある
+# イテレートできるから、色々使えるみたい
+def greeting_generator():
+    yield 'おはよう'
+    yield 'こんにちは'
+    yield 'こんばんわ'
+
+g = greeting_generator()
+
+g.__next__() # => おはよう
+next(g) # => こんにちは この書き方でもOK
+g.__next__() # => こんばんわ
+g.__next__() # => Error! StopIteration
+
+# まわせる
+for greet in greeting_generator():
+    print(greet)
+
+# 超巨大なlistの読み込みとかに使うといいみたい。file readとか…。
+
+# yield variableと書くと値をセットすることもできる
+def argv_generator():
+    text = 'おはよう'
+    yield text
+    yield text
+    yield text
+
+g = argv_generator()
+next(g) # => 'おはよう'
+g.send('こんにちわ') # => 'こんにちわ'
+next(g) # => 'こんにちわ'
+next(g) # => Error!
+
+# 他にも
+# throw() で例外を送りつける
+# close() で打ち切り
+# などできるらしいけどまだよーわからん
+
+# lambda(即時関数) 引数: 戻り値 と書く
+sum = lambda a, b: a + b
+sum(1, 2) # => 3
+
+# デコレータ 高階関数を便利というか見やすくと言うか、そんな感じでかける
+def deco_func(func):
+    def new_func(*args, **kwargs):
+        print('start')
+        print(func(*args, **kwargs))
+        print('end')
+
+    return new_func
+
+# こんな感じでデコレーションしたい関数の上に@関数名でOK
+@deco_func
+def sum(a, b):
+    return a + b
+```
