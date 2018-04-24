@@ -9,15 +9,44 @@
 ## 環境について
 
 `pyenv`でPythonそのものの管理  
-`venv`ないし`virtualenv`で実行環境(使用するPythonとライブラリ)の管理を行う
+`venv`ないし`virtualenv`で実行環境(使用するPythonとライブラリ)の管理を行う  
+`pip`でライブラリのインストールとか
 
-厳密にやるならpyenvも使ったほうがいいけど、そんなにバージョンがあがらないのでvenvのみが一般的らしい
-
-今回はvenvのみでいく
-
-Dockerを使うのもありだけどコード書くのは保管とかいろいろでしんどそ。
+で、これらをまとめて`pipenv`で管理するのがモダンな雰囲気
 
 ### 構築
+
+```bash
+# .zshrc
+
+# recommended setting: use local dir
+PIPENV_VENV_IN PROJECT=true
+```
+
+```bash
+# install global pip
+pip install pipenv
+pip3 install pipenv
+# create virtual environment(v3)
+pipenv --three
+# install all libraries
+pipenv install
+# manual install 
+pipenv install numpy
+# manual install (development tools)
+pipenv install -d flake8 yapf ipython
+# remove library
+pipenv uninstall numpy
+# enable venv
+pipenv shell
+# run command
+pipenv run COMMAND
+```
+
+`Pipfile`が要するにGemfile  
+`Pipfile.lock`が要するにGemfile.lock
+
+#### 以下、手動pip&venv(deprecated!)
 
 ```bash
 # .venvに実行環境を構築 このファイル名が多いっぽい
@@ -33,12 +62,14 @@ python3 -p python2 -m venv .venv
 pip install -r requirements.txt
 ```
 
-## pipについて
+##### pipについて
 
 venv環境下でいじってもローカルにしか反映されないけど何も考えずに実行するとグローバルに入るので注意。  
 グローバルに入れるものはあんまりないと思う。後述するIPythonくらいでいいのでは？
 
 `requirements.txt`というファイルに依存モジュールを保存するのがマナー。
+
+ただし、もうpipenvでええのでわ
 
 ```bash
 # install
