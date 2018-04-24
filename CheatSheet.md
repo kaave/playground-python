@@ -141,7 +141,10 @@ pow(10, 3) # => 1000
 10 ** 3 # => 1000
 
 # よく使うモジュール
-# numbers 基底クラスなので型判定に使う import必要ない
+# numbers 基底クラスなので型判定に使う
+# ちなみに、見ての通りtypeはそのものをチェック、isinstanceは親クラスでもOK
+import numbers
+type(1.2e-3) == float # => True
 isinstance(1.2e-3, numbers.Number) # => True
 # math(複素数ならcmath) いろいろ定番が
 import math
@@ -591,3 +594,302 @@ def deco_func(func):
 def sum(a, b):
     return a + b
 ```
+
+### クラス
+
+```python
+# ざくっとこんな感じ
+class Calc():
+    # static variable
+    pi = 3.141592
+
+    # static method
+    @staticmethod
+    def is_same(calc1, calc2):
+        return calc1.value == calc2.value
+
+    # create instance (fire before constructor)
+    # TODO: im not understand this
+    # def __new__(cls):
+    #     print('create instance')
+
+    # constructor
+    def __init__(self, initial_value=0):
+        self.value = initial_value
+
+    # instance method
+    def add(self, val):
+        self.value += val
+        return self.value
+
+    # attach self class(class method)
+    @classmethod
+    def create(cls):
+        return cls()
+
+    # like toString
+    def __str__(self):
+        return str(self.value)
+
+    # destructor: NOT recommended use this
+    # why?
+    # * can't know when called
+    # * can't guarantee called
+    def __del__(self):
+        self.value = None
+
+# use instance var
+Calc.pi # => 3.141592
+# create class instance
+calc = Calc()
+# ...and use
+calc.value # => 0
+calc.pi # => 3.141592
+calc.add(10) # => 10
+calc.add(10) # => 20
+str(calc) # => '20'
+print(calc) # => '20'
+# use static method
+Calc.is_same(Calc(), Calc(100)) # => False
+# add instance var...
+calc.append_value = 10_000
+calc.append_value # => 10000
+# remove instance var...
+del calc.append_value
+calc.append_value # => AttributeError!
+
+# create Blank class
+class BlankClass: pass
+
+blank = BlankClass()
+blank.value = 100
+blank.value # => 100 ...blank class's useful usecase?
+```
+
+継承
+
+```python
+class Base:
+    def f1(self):
+        print('f1')
+
+    def f3(self):
+        print('f3')
+
+# set variable parent class 
+class Sub(Base):
+    def f2(self):
+        print('f2')
+
+    def f1and2(self):
+        super().f1()
+        self.f2()
+    
+    # override
+    def f3(self):
+        print('overrided f3')
+
+# extends multiple
+class Base1:
+    def f1(self):
+        print('f1')
+
+class Base2:
+    def f2(self):
+        print('f2')
+
+class Sub(Base1, Base2):
+    def func(self):
+        super().f1()
+        super().f2()
+```
+
+プライベートメンバー  
+慣習的にアンスコ始まりはプライベートとみなすのが一般的(アクセスは可能)  
+アンスコ2つはじまりかつ末尾がアンスコ1つ以下の場合は外部アクセスすると**AttributeError**が発生する(がんばればアクセス不能)
+
+100%信用できるわけじゃないけど、アンスコ2つは普通に使えばいいと思う
+
+```python
+class Calc():
+    # constructor
+    def __init__(self, initial_value=0):
+        # private member
+        self.__value = initial_value
+
+calc.__value # => AttributeError
+calc._Calc__value # => 100
+```
+
+プロパティ  
+Decoratorでいい感じに書ける
+
+```python
+import numbers
+
+class Calc():
+    def __init__(self, initial_value=0):
+        self.__value = initial_value
+
+    # calc.value
+    @property
+    def value(self):
+        return self.__value
+
+    # calc.value = 100
+    @value.setter
+    def value(self, value):
+        if isinstance(value, numbers.Number):
+            self.__value = value
+
+    # del calc.value
+    @value.deleter
+    def value(self):
+        pass
+
+calc = Calc(100)
+calc.value # => 100
+calc.value = 1000
+calc.value # => 1000
+del calc.value
+calc.value # => None
+```
+
+ディスクリプタ  
+**\_\_get__**  
+**\_\_set__**  
+**\_\_delete__**  
+これらのメンバを持つオブジェクトへアクセスした際の挙動をカスタムできる
+
+```python
+class Money:
+    def __init__(self):
+        self.__price = 0
+
+    def __get__(self, instance, owner):
+        return self.__price
+
+    def __set__(self, instance, price):
+        self.__price = price
+
+    def __delete__(self, instance):
+        del self.__price
+        print('losted...')
+
+class You:
+    def __init__(self):
+        self.money = Money()
+
+you = You();
+you.money = 10000
+print(you.money)
+del you.money
+print(you.money) # TODO: not active why?
+```
+
+クラスデコレータ  
+関数と同じようなもん
+
+```python
+# 引数にクラスをとる関数
+# TODO: もっといい感じのサンプル
+def add_member(cls):
+    cls.x = 'hello'
+    return cls
+
+# ↑を@つきで上に書くとデコレータとなる
+@add_member
+class Sample:
+    pass
+
+obj = Sample() # Sampleクラスをインスタンス化する 
+obj.x # => hello
+```
+
+クラスの特殊メソッド一覧  
+toString的なもの
+
+| method name | desc |
+|-------------|------|
+|\_\_repr__(self)|オブジェクト情報を表す文字列|
+|\_\_str__(self)|Python版toString|
+|\_\_bytes__(self)|byte型に変換(TODO: 使えなかった)|
+|\_\_format__(self, format_spec)|書式指定文字列format_specに準じた文字列に変換|
+|\_\_hash__(self)|ハッシュ値(整数)に変換|
+|\_\_bool__(self)|オブジェクトの比較用(TODO: 使えなかった)|
+
+比較演算用メソッド  
+それぞれの比較演算子で比較した際に発火する
+
+| operator | method name (self, target) |
+|---|---|
+|==|\_\_eq__|
+|!=|\_\_ne__|
+|<|\_\_lt__|
+|<=|\_\_le__|
+|>|\_\_gt__|
+|>=|\_\_ge__|
+
+同じ要領で数値演算用メソッド  
+
+| operator | method name (self, target) |
+|---|---|
+|+|\_\_add__|
+|-|\_\_sub__|
+|*|\_\_mul__|
+|/|\_\_truediv__|
+|//|\_\_floordiv__|
+|%|\_\_mod__|
+|divmod()|\_\_divmod__|
+|**|\_\_pow__|
+|<<|\_\_lshift__|
+|>>|\_\_rshift__|
+|&|\_\_and__|
+|^|\_\_xor__|
+|\||\_\_or__|
+
+他にも色々あるので[公式ドキュメント](https://docs.python.jp/3.5/reference/datamodel.html#emulating-numeric-types)  
+\_\_str__なんかは実装しといたほうがいいよね やっぱり
+
+### 例外
+
+```python
+# Python's try~catch~finally
+try:
+    print(100 / 0)
+except ZeroDivisionError as error:
+    print('割り算なのに0')
+except Exception as error:
+    print('その他のエラー')
+    print(type(error))
+    print(str(error))
+else:
+    print('エラーなかった！')
+finally:
+    print('共通でここ通る')
+
+# Python's throw
+import numbers
+def sum(a, b):
+    if not isinstance(a, numbers.Number):
+        raise TypeError('aがNumberではありません')
+    elif not isinstance(b, numbers.Number):
+        raise TypeError('bがNumberではありません')
+
+    return a + b
+
+# Python's custom error
+class CurseNumberError(Exception):
+    pass
+
+def check_number(num):
+    if num == 666:
+        raise CurseNumberError('呪いの数字です')
+
+    return True
+
+check_number(1) # => True
+check_number(666) # => CurseNumberError!
+```
+
+http://www.python.ambitious-engineer.com/introduction-index#i-6
