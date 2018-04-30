@@ -1268,7 +1268,8 @@ with open('./memo/dummy.json', 'r') as f:
 
 #### configparser
 
-`.ini`ファイル形式で設定ファイルを作るのがデフォらしい 拡張子は`.conf`ﾄﾉｺﾄ
+`.ini`ファイル形式で設定ファイルを作るのがデフォらしい 拡張子は`.conf`ﾄﾉｺﾄ  
+で、Pythonから楽に読める`configparser`という標準ライブラリがある
 
 ```python
 from configparser import ConfigParser
@@ -1282,3 +1283,10 @@ test.getint('num') # => 10
 test.getboolean('iam') # => True
 test.get('nothing', 'to say') # => to say: use default value
 ```
+
+#### copy
+
+`copy`モジュールの`copy`, `deepcopy` がそれぞれshallow, deepのコピー  
+使い方は第一引数に元ネタを渡すだけなので略
+
+自前のクラスで使う際には`__deepcopy__`を定義する
