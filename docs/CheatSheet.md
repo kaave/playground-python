@@ -1,4 +1,4 @@
-# Pythone cheat sheat
+# Python cheat sheet
 
 ## `2`と`3`
 
@@ -20,7 +20,7 @@
 # .zshrc
 
 # recommended setting: use local dir
-PIPENV_VENV_IN PROJECT=true
+PIPENV_VENV_IN PROJECT=1
 ```
 
 ```bash
@@ -1144,4 +1144,123 @@ if __name__ == '__main__':
 
 とか書くと直叩きの際にのみこの文字列が実行される
 
+### 定番モジュール
 
+#### OrderedDict
+
+dict型(っぽい)のに順序が保証されるというphpのdictみたいなものである
+
+**コンストラクタで値を突っ込むと順序が保証されない**ので気をつける
+
+```python
+from collections import OrderedDict
+data_dict = OrderedDict()
+data_dict['apple'] = 100
+data_dict['orange'] = 80
+data_dict['banana'] = 70
+
+for key, val in data_dict.items():
+    print(key, val) # => apple 100, orange 80, banana 70
+
+# これなら保証されるらしい
+data_dict = OrderedDict([['apple', 100], ['orange', 80], ['banana', 70]])
+for key, val in data_dict.items():
+    print(key, val)
+```
+
+#### 日時関係
+
+すべて`datetime`モジュールに入っている
+
+|name     |task       |
+|:--------|:----------|
+|date     |年月日     |
+|time     |時分秒     |
+|datetime |date + time|
+|timedelta|経過時間   |
+
+```python
+# datetime
+from datetime import datetime, timedelta
+
+datetime.now() # => CURRENT DATETIME
+# required ymd!
+datetime(2018, 4, 30) # => 2018-4-30 00:00:00
+datetime(year=2018, month=4, day=30) # => 2018-4-30 00:00:00
+datetime.strptime('2018-04-30', '%Y-%m-%d') # => 2018-4-30 00:00:00
+# option args
+datetime(2018, 4, 30, 10, 0) # => 2018-4-30 10:00:00
+datetime(2018, 4, 30, minute=10) # => 2018-4-30 00:10:00
+datetime.strptime('2018-04-30 10:20:30', '%Y-%m-%d %H:%M:%S') # => 2018-4-30 00:00:00
+# get values
+dt = datetime(2018, 4, 30, 10, 20, 30, 123) # => 2018-04-30 10:20:30.000123
+str(dt) # => 2018-04-30 10:20:30.000123
+dt.year # => 2018
+dt.month # => 4
+dt.day # => 30
+dt.hour # => 10
+dt.minute # => 20
+dt.second # => 30
+dt.microsecond # => 123
+dt.strftime('%A %Y/%m/%d %H:%M:%S') # => Monday 2018/04/30 10:20:30
+# calc
+delta = datetime(2018, 6, 1) - datetime(2018, 5, 15, 20, 39, 32, 1234)
+delta.days # => 16
+delta.seconds # => 12027
+delta.microseconds # => 998766
+delta.total_seconds() # => 1394427.998766
+str(delta) # => 16 days, 3:20:27
+(datetime(2018, 6, 1) - timedelta(days=1)).strftime('%A %Y/%m/%d') # => Thursday 2018/05/31
+
+
+```
+
+`strptime`, `strftime` の書式については[ここ](https://docs.python.jp/3/library/datetime.html#strftime-strptime-behavior) Cと同じ
+
+```python
+# date
+# required ymd!
+from datetime import date, datetime
+date(2018, 4, 30) # => 2018-4-30
+date(year=2018, month=4, day=30) # => 2018-4-30
+# not have strptime. cast from datetime
+datetime.strptime('2018-04-30', '%Y-%m-%d').date() # => 2018-4-30
+
+# time
+from datetime import time, datetime
+time(10) # => 10:00:00
+time(hour=10, second=20) # => 10:00:20
+# not have strptime. cast from datetime
+datetime.strptime('10:20:30', '%H:%M:%S').time() # => 10:20:30
+```
+
+#### json
+
+`json` を使う
+
+```python
+import json
+
+# Pythonの値をJSON形式の文字列へ変換
+json.dumps(
+    # この例はdictだがかなりなんでもOK tuple, OrderedDict, boolean...
+    {
+        'user': {
+            'name': '山田太郎',
+            'age': 30,
+            'height': 172,
+            'weight': 62
+        }
+    },
+    indent=2,   # 出力結果にインデントをつける デフォルトはなし(つけない)
+    ensure_ascii=False, # 出力結果をアスキーエンコードするか 日本語含む場合はしないとえらいことに デフォルトTrue
+    sort_keys=True # 出力のたびに順番が変わるのが嫌ならsortする デフォルFalse
+)
+
+# JSON形式の文字列からPythonの値へ変換
+json.loads('{"items": [{"id": 1, "name": "ペン"}, {"id": 2, "name": "アップル"}, {"id": 3, "name": "パイナップル"}], "status": "sell"}')
+
+# JSONファイルを読み込む
+with open('./memo/dummy.json', 'r') as f:
+    print(json.load(f))
+```
