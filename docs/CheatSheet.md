@@ -39,12 +39,42 @@ pipenv install -d flake8 yapf ipython
 pipenv uninstall numpy
 # enable venv
 pipenv shell
-# run command
+# run Pipfile's [scripts] or global commands
 pipenv run COMMAND
 ```
 
-`Pipfile`が要するにGemfile  
-`Pipfile.lock`が要するにGemfile.lock
+`Pipfile`が要するにGemfile `toml` format  
+`Pipfile.lock`が要するにGemfile.lock `json` format
+
+#### Pipfileの書式
+
+```toml
+# libraries source url
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+# pipenv run XXX
+[scripts]
+test = "unittest"
+
+# Dependencies libraries
+[packages]
+numpy = "*"
+
+# Devendencies libraries (for development)
+[dev-packages]
+yapf = "*"
+"flake8" = "*"
+ipython = "*"
+jedi = "*"
+neovim = "*"
+
+# Python version
+[requires]
+python_version = "3.6"
+```
 
 #### 以下、手動pip&venv(deprecated!)
 
@@ -99,6 +129,7 @@ print(1, end='')
 'Hello,' + 'World' # => Hello,World
 # 数値など文字列以外を結合する際にはキャスト
 str(12) + '/' + str(31) # => 12/31
+# 詳しくは後ほど
 
 # 変数そのものはRubyとそっくり いきなり宣言OKとか
 a = 10
@@ -923,4 +954,174 @@ check_number(1) # => True
 check_number(666) # => CurseNumberError!
 ```
 
-http://www.python.ambitious-engineer.com/introduction-index#i-6
+ファイル操作
+
+```python
+# Bad: Basic pattern
+f = open('memo/sample.txt', 'r')   # Read mode
+# f = open('memo/sample.txt', 'r') # Write mode
+# f = open('memo/sample.txt', 'r') # Append mode
+# f = open('memo/sample.txt', 'r') # Read&Write mode
+# f = open('memo/sample.txt', 'r', encoding='shift_jis') # use sjis
+print(f.read()) # output all text
+f.write('Hello, it is python script.') # output text
+f.close()
+
+# Good: use 'with' statement
+with open('memo/sample.txt', 'w') as f:
+    f.write('Hello, it is python script.') # output text
+
+# exists
+import os
+path = '/usr/local/bin/python3'
+
+if not os.path.exists(path):
+    print('not found path')
+elif os.path.isfile(path):
+    print('file path')
+elif os.path.isdir(path):
+    print('dir path')
+else:
+    raise(Exception('Unknown file: not file&dir.'))
+
+# remove file
+import os
+os.remove('file.txt') # remove file
+os.remove('dir') # Error! PermissionError
+
+# create dir
+import os
+os.mkdir('parent')          # mkdir
+os.makedirs('parent/child') # mkdirp
+
+# remove dir
+import os
+os.rmdir('parent')            # rmdir enable empty dir only
+os.removedirs('parent/child') # rmdirp
+
+# copy
+import shutil
+shutil.copy('docs/CheatSheet.md', 'dummy.md') # => dummy.md, and copied file
+shutil.copytree('docs', 'dummy') # => dummy, and copied dir
+```
+
+文字列について
+
+```python
+# concat
+'Hello' + 'World' # => HelloWorld
+'Hello' + str(100) # => Hello100
+# listをjoin
+' '.join(('Arsenal', 'Football', 'Club')) # => Arsenal Football Club
+# split
+'Arsenal Football Club'.split(' ') # => ['Arsenal', 'Football', 'Club']
+# replace
+'Apple Computer'.replace('Apple', 'Microsoft') # => Microsoft Computer
+# get char/string
+'Apple'[0] # => A
+'Apple'[3] # => l
+'Apple'[-1] # => e
+'Apple'[1:3] # => pp
+'Apple'[:3] # => App
+'Apple'[2:] # => ple
+'Apple'[:-1] # => Appl
+# includes
+'pl' in 'Apple' # => True
+'APPLE' in 'Apple' # => False
+# loop
+for c in 'Apple':
+    print(c)
+# search
+'Apple'.find('pl') # => 2
+'Apple'.rfind('pl') # => 2
+# count
+'Apple'.count('p') # => 2
+# trim
+' Apple   '.strip() # => 'Apple'
+' Apple   '.lstrip() # => 'Apple   '
+' Apple   '.rstrip() # => ' Apple'
+# Upper/Lower
+'ApPlE'.upper() # => 'APPLE'
+'ApPlE'.lower() # => 'apple'
+'ApPlE'.capitalize() # => 'APPLE'
+
+# Checker
+# isalnum => /a-zA-Z0-9/
+# isalpha => /a-zA-Z/
+'1a'.isalnum() # => True
+'1a'.isalpha() # => True
+'あ'.isalnum() # => True!!!!!
+'あ'.isalpha() # => True!!!!!
+'あ'.encode('utf-8').isalnum() # => False
+'あ'.encode('utf-8').isalpha() # => False
+# isdecimal
+# isdigit
+# isnumeric
+# いずれも微妙
+'1'.isdigit() # => True
+'1'.isdecimal() # => True
+'1'.isnumeric() # => True
+'-0.01'.isdigit() # => False!!!!!!!!!!
+'-0.01'.isdecimal() # => False!!!!!!!!!!
+'-0.01'.isnumeric() # => False!!!!!!!!!!
+'0.01'.isdigit() # => False
+'0.01'.isdecimal() # => False
+'0.01'.isnumeric() # => False
+'0٠01'.isdigit() # => True!!!!!!!!!!
+'0٠01'.isdecimal() # => True!!!!!!!!!!
+'0٠01'.isnumeric() # => True!!!!!!!!!!
+'１'.isdigit() # => True
+'１'.isdecimal() # => True
+'１'.isnumeric() # => True
+'百'.isdigit() # => False
+'百'.isdecimal() # => False
+'百'.isnumeric() # => True
+'Ⅳ'.isdigit() # => False
+'Ⅳ'.isdecimal() # => False
+'Ⅳ'.isnumeric() # => True
+# いずれも使いものにならないため、とりあえず変換して例外を拾うのが早い
+def is_int(num_str, default=0):
+    try:
+        return (True, int(num_str))
+    except ValueError:
+        return (False, default)
+
+is_int('いちおく', 1_000_000_000) # => (False, 1000000000)
+is_int('-10') # => (True, 10)
+is_int('1E20') # => (False, 0)
+
+# string format
+# >= 3.6
+f'Oh, it\'s nice!: Python{3.6}' # => "Oh, it's nice!: Python3.6"
+# >= 3
+'{0}, {1}, {2}'.format('Zero', 'One', 'Two') # => 'Zero, One, Two'
+# 2.x
+'%s, %s, %s' % ('Zero', 'One', 'Two') # => 'Zero, One, Two'
+'%(first)s, %(second)s, %(third)s' % {'first': 'Zero', 'second': 'One', 'third': 'Two' } # => 'Zero, One, Two'
+```
+
+### モジュール
+
+```python
+# 全部引っ張る
+import math
+math.pi # => 3.141592...
+# ピンポイントで引っ張る
+# from モジュール名 import ターゲット
+from math import pi
+pi # => 3.141592...
+# 別名を付けて引っ張る
+import numpy as np
+# from numpy import random as ran # これもできる
+np.random.rand(50)
+```
+
+#### 自作モジュール
+
+```python
+# src/add.pyに定義されているaddをindex.pyから引っ張る
+# import src # 冗長な書き方
+from src.add import add
+add(1, 2) # => 3
+
+```

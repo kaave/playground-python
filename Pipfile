@@ -3,14 +3,20 @@ url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
+[scripts]
+test = "unittest"
+
+# devendencies
+[packages]
+numpy = "*"
+
+# devDevendencies
 [dev-packages]
 yapf = "*"
 "flake8" = "*"
 ipython = "*"
 jedi = "*"
 neovim = "*"
-
-[packages]
 
 [requires]
 python_version = "3.6"
