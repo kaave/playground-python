@@ -1119,9 +1119,29 @@ np.random.rand(50)
 #### 自作モジュール
 
 ```python
-# src/add.pyに定義されているaddをindex.pyから引っ張る
-# import src # 冗長な書き方
-from src.add import add
+# ~/src/add.pyに定義されているaddとmulをindex.pyから引っ張る
+# import src # 冗長な書き方なので以下のように書くべき
+from src.add import add, mul
+# import src.add as my_add こういうのもありだと思う
 add(1, 2) # => 3
+mul(1, 2) # => 2
+# 古いpython(3.3以前)だとディレクトリの中に__init__.pyってファイルが必要だったみたいだけど、もう今はいらない
+# 3.3は2012年9月29日リリースなのでもういいでしょう
 
 ```
+
+モジュール利用時に`__pycache__`というコンパイル結果のキャッシュディレクトリが作成されてウンウンカンヌン  
+venv環境下だと`lib/pythonX.X/__pycache__`にできるっぽい  
+あんま意識することもないか 省略
+
+`__name__` という特殊変数にはそのファイルが実行された際のモジュール名がはいる  
+ただしエントリーポイントの場合は`__main__`という文字列が入る ので、
+
+```python
+if __name__ == '__main__':
+    print('run from this file')
+```
+
+とか書くと直叩きの際にのみこの文字列が実行される
+
+
