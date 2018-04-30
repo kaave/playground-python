@@ -44,7 +44,8 @@ pipenv run COMMAND
 ```
 
 `Pipfile`が要するにGemfile `toml` format  
-`Pipfile.lock`が要するにGemfile.lock `json` format
+`Pipfile.lock`が要するにGemfile.lock `json` format  
+環境変数はデフォルトで `.env` に対応しているらしい
 
 #### Pipfileの書式
 
@@ -1263,4 +1264,21 @@ json.loads('{"items": [{"id": 1, "name": "ペン"}, {"id": 2, "name": "アップ
 # JSONファイルを読み込む
 with open('./memo/dummy.json', 'r') as f:
     print(json.load(f))
+```
+
+#### configparser
+
+`.ini`ファイル形式で設定ファイルを作るのがデフォらしい 拡張子は`.conf`ﾄﾉｺﾄ
+
+```python
+from configparser import ConfigParser
+conf = ConfigParser()
+conf.read('memo/dummy.conf')
+
+# get [TEST] section
+test = conf['TEST']
+test.get('message') # => im lucky
+test.getint('num') # => 10
+test.getboolean('iam') # => True
+test.get('nothing', 'to say') # => to say: use default value
 ```
