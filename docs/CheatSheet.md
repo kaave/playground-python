@@ -1290,3 +1290,111 @@ test.get('nothing', 'to say') # => to say: use default value
 使い方は第一引数に元ネタを渡すだけなので略
 
 自前のクラスで使う際には`__deepcopy__`を定義する
+
+#### log
+
+`logging` モジュールからloggerを生成して使用するのが良いらしい
+
+```python
+import logging
+
+# create handler
+handler = logging.StreamHandler() # default output
+# handler = logging.FileHandler('memo.log') # file output
+handler.setLevel(logging.DEBUG)
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+
+# get logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(handler)
+
+# get child logger (separate on .)
+logger_child = logging.getLogger(f'{__name__}.child')
+
+# output log
+logger.info('infoログ') # => 2018-05-03 21:45:48,614 - __main__ - INFO - infoログ
+logger_child.info('childログ') # => 2018-05-03 21:56:31,476 - __main__.child - INFO - childログ
+```
+
+以下はloggerを生成しないお作法の悪いやり方
+
+```python
+import logging
+
+# set output log level
+logging.basicConfig(level=logging.DEBUG)
+
+logging.debug('デバッグ情報です') # => DEBUG:root:デバッグ情報です
+logging.info('インフォメーションです') # => INFO:root:インフォメーションです
+logging.warning('警告です') # => WARNING:root:警告です
+logging.error('エラーです') # => ERROR:root:エラーです
+logging.critical('致命傷です') # => CRITICAL:root:致命傷です
+
+# set format
+logging.basicConfig(
+    format='%(asctime)s- %(name)s - %(levelname)s - %(message)s',
+    level=logging.DEBUG
+)
+logging.info('インフォメーションです') # => 2018-05-03 21:33:21,623- root - INFO - インフォメーションです
+
+# set output path
+logging.basicConfig(
+    format='%(asctime)s- %(name)s - %(levelname)s - %(message)s',
+    filename='test.log',
+    level=logging.DEBUG
+)
+logging.info('インフォメーションです') # => have nothing to default output, to test.log
+```
+
+yamlやjsonで設定するとスッキリする  
+なお、ini形式でもいけるらしいけど略
+
+ファイル形式に対応したパーサが必要
+
+* yaml: `PyYAML`を入れておく
+* json: `json`がデフォルトで入っている
+
+jsonだとダブルクォートが面倒なのでyamlがいいかな?
+
+```yaml
+# logconf.yml
+version: 1
+
+formatters:
+  fmt1:
+    format: '%(asctime)s %(name)s %(levelname)s %(message)s [fmt1]'
+
+handlers:
+  h1:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: fmt1
+    stream: ext://sys.stdout
+  h2:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: fmt1
+    filename: sample.log
+
+loggers:
+  sample:
+    handlers: [h2]
+    level: DEBUG
+    qualname: console
+    propagate: no
+
+root:
+  level: DEBUG
+  handlers: [h1]
+```
+
+```python
+import yaml
+from logging import config, getLogger
+
+# TODO: with文で書かなくていいのか？
+config.dictConfig(yaml.load(open("logconf.yml", encoding='UTF-8').read()))
+logger = getLogger(__name__)
+logger.error("エラーが発生しました")
+```
