@@ -1,4 +1,4 @@
-import memo.fizzbuzz as fb
+from memo import fizzbuzz as fb
 
 
 def add(a, b):
@@ -11,3 +11,7 @@ def mul(a, b):
 
 def fizzbuzz():
     fb.fizzbuzz()
+
+
+if __name__ == '__main__':
+    fizzbuzz()
