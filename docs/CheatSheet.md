@@ -1212,8 +1212,6 @@ delta.microseconds # => 998766
 delta.total_seconds() # => 1394427.998766
 str(delta) # => 16 days, 3:20:27
 (datetime(2018, 6, 1) - timedelta(days=1)).strftime('%A %Y/%m/%d') # => Thursday 2018/05/31
-
-
 ```
 
 `strptime`, `strftime` の書式については[ここ](https://docs.python.jp/3/library/datetime.html#strftime-strptime-behavior) Cと同じ
