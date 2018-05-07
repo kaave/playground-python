@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [scripts]
-test = "python -m unittest"
+test = "python -m unittest tests/**/*.py"
 calc = "python ./memo/calc.py"
 
 # devendencies
