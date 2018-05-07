@@ -1,5 +1,5 @@
 import re
-import os
+import subprocess
 from time import sleep
 from datetime import datetime
 from watchdog.observers import Observer
@@ -26,7 +26,7 @@ class EventHandler(FileSystemEventHandler):
         if event.is_directory or EventHandler.is_compiled_file(event.src_path):
             return
 
-        os.system('pipenv run test')
+        subprocess.run(['pipenv', 'run', 'test'])
         EventHandler.log(event)
 
     def on_deleted(self, event):

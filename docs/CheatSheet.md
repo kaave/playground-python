@@ -739,7 +739,7 @@ class Base:
     def f3(self):
         print('f3')
 
-# set variable parent class 
+# set variable parent class
 class Sub(Base):
     def f2(self):
         print('f2')
@@ -747,7 +747,7 @@ class Sub(Base):
     def f1and2(self):
         super().f1()
         self.f2()
-    
+
     # override
     def f3(self):
         print('overrided f3')
@@ -1128,7 +1128,7 @@ add(1, 2) # => 3
 mul(1, 2) # => 2
 # 古いpython(3.3以前)だとディレクトリの中に__init__.pyってファイルが必要だったみたいだけど、もう今はいらない
 # 3.3は2012年9月29日リリースなのでもういいでしょう
-
+# →やっぱ作ったほうがなにかとおかしいことが起こらない unittest使用時とか
 ```
 
 モジュール利用時に`__pycache__`というコンパイル結果のキャッシュディレクトリが作成されてウンウンカンヌン  
@@ -1395,4 +1395,43 @@ from logging import config, getLogger
 config.dictConfig(yaml.load(open("logconf.yml", encoding='UTF-8').read()))
 logger = getLogger(__name__)
 logger.error("エラーが発生しました")
+```
+
+### シェル実行
+
+古臭いやりかたが色々あるけど、現状は`subprocess`が便利
+
+```python
+from sys.stdout import buffer
+import subprocess
+
+# GOOD:
+# run: useful!
+res = subprocess.run(['ls', '-la'], stdout=subprocess.PIPE)
+res.returncode # => cmd returncode
+res.stdout # => bytes format result of 'ls'
+buffer.write(res.stdout) # => string format result of 'ls'
+
+# when CMD failed, throw FileNotFoundError
+try:
+    subprocess.run('lkjsdflkjsd', stdout=subprocess.PIPE)
+except FileNotFoundError as error:
+    print(f'Error! {error}') # => output this
+
+# BETTERs:
+# call: standard
+subprocess.call('ls') # => 0
+# output result of 'ls'...
+
+# check_call: on failed, throw CalledProcessError
+try:
+    subprocess.check_call('notfoundcommand')
+except CalledProcessError:
+    print('Error.') # => output this.
+
+# check_output: get default output
+try:
+    subprocess.check_output('ls') # => output result of 'ls'
+except CalledProcessError:
+    print('Error.')
 ```
