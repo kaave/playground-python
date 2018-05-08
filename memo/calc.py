@@ -1,7 +1,7 @@
 from memo import fizzbuzz as fb
 
 
-def add(a, b):
+def add(a: int, b: int):
     return a + b
 
 

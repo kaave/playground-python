@@ -7,12 +7,11 @@ name = "pypi"
 watch = "python -m watch"
 test = "python -m unittest discover"
 calc = "python ./memo/calc.py"
+typecheck = "mypy --ignore-missing-imports"
 
-# devendencies
 [packages]
 numpy = "*"
 
-# devDevendencies
 [dev-packages]
 yapf = "*"
 "flake8" = "*"
@@ -20,6 +19,7 @@ ipython = "*"
 jedi = "*"
 neovim = "*"
 watchdog = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.6"
