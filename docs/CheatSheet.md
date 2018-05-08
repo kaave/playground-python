@@ -334,6 +334,48 @@ str(12)
 ary + ary2 # => [1, 2, 3, 1, 'two', 3]
 ```
 
+```python
+# 正規表現 reってモジュールにすべてが
+import re
+pattern = '*\.py$'
+pattern_bs_escaped = r'python\*.py' # => rをつけることでバックスラッシュが勝手にエスケープされる…ありがたみがわからない
+compiled_regex = re.compile(pattern) # => 検索条件をあらかじめコンパイルするパターン 繰り返し使うならこっち
+match_object = compiled_regex('python.py')
+match_object = re.match(pattern, 'python.py') # => あらかじめコンパイルしないパターン
+
+# マッチ箇所の取得
+# 主に以下の4つを使うが、searchとfinditerがあれば他はいらないような
+
+# match 先頭から検索する ^付きだと思えば
+re.match('\.py$', 'python.py') # => 先頭から検索するので、マッチしない 使いづらい
+
+# search ふつう 複数ヒットしても最初のしか取れないので注意
+match_object = re.search('\.py$', 'python.py') # => matchObject
+if match_object:
+    print(f'matched! start: {match_object.start()}, end: {match_object.end()}, group: {match_object.group()}, span: {match_object.start()}')
+
+# findall マッチした箇所の文字列をリストで返す
+re.findall('py', 'pyppyppypyyppyypy') # => ['py', 'py', 'py', 'py', 'py', 'py']
+
+# finditer マッチした箇所のmatchObjectをリストで返す
+match_iterator = enumerate(re.finditer('\d+', '1a2b3cd456e78fgi9k0'))
+for index, matcher in match_iterator:
+    print(f'{index}: {matcher.group()}') # => いい感じに出る
+
+# iとかgとかのオプションは、引数で渡す
+re.finditer('\w+', '1a2b3CD456E78FgI9k0', re.I) # => /\w/i
+
+# マッチ箇所の置換
+# sub
+re.sub('\s', '_', 'BEFORE AFTER') # => BEFORE_AFTER
+re.sub('(c)', r'\1' * 3, 'abcde') # => abcccde
+# split
+re.split('[E-G]', 'BEFORE AFTER') # => ['B', '', 'OR', ' A', 'T', 'R']
+
+# 日本語を扱う際にはunicode変換をかけてから
+re.search(u'[い-え]+', u'あいうえお').group() # => いうえ
+```
+
 シーケンス型共通で使える演算子はこんな感じ
 
 ```python
@@ -370,7 +412,7 @@ setもある(重複と順序を持たないarrayみたいな)
 s = {1, 2, 3}
 s = {'eight', 'nine', 10}
 s = {1, 2, 3, 1, 1, 1} # => {1, 2, 3}
-s = {1, 2, [1, 2, 3]} # => ERROR! ハッシュ化できる値しか入れられない 
+s = {1, 2, [1, 2, 3]} # => ERROR! ハッシュ化できる値しか入れられない  
 s = {1, 2, (1, 2, 3)} # => OK
 set([1, 2, 3, 1, 2, 3]) # => {1, 2, 3}
 
