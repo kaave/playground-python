@@ -1,11 +1,10 @@
 import re
 import subprocess
+import os
 from time import sleep
 from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
-
-WATCH_DIRS = ['./memo/', './tests/']
 
 
 class EventHandler(FileSystemEventHandler):
@@ -39,9 +38,14 @@ class EventHandler(FileSystemEventHandler):
 
 
 def main():
+    if not os.path.exists('./.env'):
+        print('ERROR: Not found .env!')
+        return
+
+    watch_paths = os.getenv('WATCH_PATHS', '').split(',')
     observer = Observer()
     event_handler = EventHandler()
-    for path in WATCH_DIRS:
+    for path in watch_paths:
         observer.schedule(event_handler, path, recursive=True)
     observer.start()
 
@@ -51,7 +55,7 @@ def main():
     print('===================')
     print('')
     print('watching paths:')
-    for path in WATCH_DIRS:
+    for path in watch_paths:
         print(f'  {path}')
     print('')
 
