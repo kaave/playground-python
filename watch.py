@@ -27,6 +27,10 @@ class EventHandler(FileSystemEventHandler):
             return
 
         subprocess.run(['pipenv', 'run', 'typecheck', event.src_path])
+        # lint on editor, not watch
+        # subprocess.run(['pipenv', 'run', 'lint', event.src_path])
+        # fix on editor, not watch
+        # subprocess.run(['pipenv', 'run', 'fix', event.src_path])
         subprocess.run(['pipenv', 'run', 'test'])
         EventHandler.log(event)
 
