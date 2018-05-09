@@ -12,7 +12,6 @@ lint = 'flake8 .'
 fix = 'yapf -ir .'
 
 [packages]
-numpy = "*"
 
 [dev-packages]
 yapf = "*"
